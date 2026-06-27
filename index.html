@@ -2,435 +2,176 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>MyPass — Guest WiFi Manager</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>MyPass — Smart Guest WiFi</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-:root {
-  --bg: #F0EEE9;
-  --card: #FFFFFF;
-  --border: rgba(0,0,0,0.09);
-  --text: #1A1A18;
-  --muted: #6B6B67;
-  --teal: #1D9E75;
-  --teal-light: #E1F5EE;
-  --teal-dark: #0F6E56;
-  --red: #D94F4F;
-  --red-light: #FCEAEA;
-  --amber: #B87414;
-  --amber-light: #FEF0D6;
-  --radius: 14px;
-  --radius-sm: 9px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.04);
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-}
-
-/* ── HEADER ── */
-.header {
-  background: var(--card);
-  border-bottom: 0.5px solid var(--border);
-  padding: 0 20px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.logo {
-  width: 34px; height: 34px;
-  background: linear-gradient(135deg, #1D9E75, #0F6E56);
-  border-radius: 9px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.logo svg { width: 18px; height: 18px; }
-.header-title { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
-.header-sub { font-size: 12px; color: var(--muted); margin-left: auto; }
-.header-key {
-  font-size: 11px; background: var(--teal-light); color: var(--teal-dark);
-  padding: 4px 10px; border-radius: 20px; font-weight: 500;
-}
-
-/* ── LAYOUT ── */
-.page { max-width: 960px; margin: 0 auto; padding: 20px 16px 60px; }
-
-/* ── SETUP SCREEN ── */
-.setup-screen {
-  min-height: 80vh;
-  display: flex; align-items: center; justify-content: center;
-}
-.setup-card {
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 36px 32px;
-  max-width: 440px;
-  width: 100%;
-  box-shadow: var(--shadow);
-  text-align: center;
-}
-.setup-card .logo-big {
-  width: 56px; height: 56px;
-  background: linear-gradient(135deg, #1D9E75, #0F6E56);
-  border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 16px;
-}
-.setup-card .logo-big svg { width: 28px; height: 28px; }
-.setup-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-.setup-card p { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
-.setup-fields { text-align: left; }
-
-/* ── CARDS ── */
-.card {
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 20px;
-  box-shadow: var(--shadow);
-}
-
-/* ── STATS ROW ── */
-.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-.stat-card {
-  background: var(--card);
-  border-radius: var(--radius-sm);
-  padding: 16px;
-  text-align: center;
-  box-shadow: var(--shadow);
-}
-.stat-num { font-size: 28px; font-weight: 700; color: var(--text); }
-.stat-num.green { color: var(--teal); }
-.stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-/* ── MAIN GRID ── */
-.main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-@media (max-width: 640px) {
-  .main-grid { grid-template-columns: 1fr; }
-  .stats-row { grid-template-columns: repeat(3, 1fr); }
-}
-
-/* ── FORM ── */
-.section-title {
-  font-size: 14px; font-weight: 600; margin-bottom: 16px;
-  display: flex; align-items: center; gap: 8px;
-}
-.section-title .icon {
-  width: 28px; height: 28px;
-  background: var(--teal-light);
-  border-radius: 7px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px;
-}
-label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 5px; }
-.field { margin-bottom: 14px; }
-input[type=text], input[type=password], select, input[type=number] {
-  width: 100%; padding: 10px 12px;
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg);
-  color: var(--text);
-  font-size: 14px;
-  outline: none;
-  transition: border-color .15s;
-}
-input:focus, select:focus { border-color: var(--teal); background: white; }
-
-/* Duration picker */
-.dur-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
-.dur-btn {
-  padding: 9px 4px;
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg);
-  color: var(--muted);
-  font-size: 13px;
-  cursor: pointer;
-  text-align: center;
-  transition: all .15s;
-  font-family: inherit;
-}
-.dur-btn:hover { border-color: var(--teal); color: var(--teal); }
-.dur-btn.active {
-  background: var(--teal-light);
-  border-color: var(--teal);
-  color: var(--teal-dark);
-  font-weight: 600;
-}
-
-/* Primary button */
-.btn-primary {
-  width: 100%; padding: 13px;
-  border: none; border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, #1D9E75, #0F6E56);
-  color: white;
-  font-size: 15px; font-weight: 600;
-  cursor: pointer;
-  transition: opacity .15s;
-  margin-top: 4px;
-  font-family: inherit;
-}
-.btn-primary:hover { opacity: .9; }
-.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
-
-.btn-outline {
-  padding: 9px 18px;
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg);
-  color: var(--text);
-  font-size: 13px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all .15s;
-}
-.btn-outline:hover { background: var(--card); border-color: var(--teal); color: var(--teal); }
-
-.btn-danger {
-  padding: 7px 14px;
-  border: 0.5px solid var(--red);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--red);
-  font-size: 12px;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-/* ── RESULT PANEL ── */
-.result-panel {
-  display: none;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 0.5px solid var(--border);
-}
-.pass-display {
-  font-size: 28px; font-weight: 700;
-  letter-spacing: 3px;
-  font-family: 'Courier New', monospace;
-  color: var(--text);
-  margin: 6px 0 10px;
-  word-break: break-all;
-  line-height: 1.3;
-}
-.nato-box {
-  background: var(--teal-light);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  font-size: 12px;
-  color: var(--teal-dark);
-  line-height: 1.8;
-  margin-bottom: 12px;
-}
-.nato-box strong { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 3px; }
-.qr-wrap { display: flex; justify-content: center; margin: 12px 0; }
-.qr-wrap canvas { border-radius: 8px; }
-
-/* Timer */
-.timer-wrap { margin: 12px 0; }
-.timer-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.timer-label { font-size: 12px; color: var(--muted); }
-.timer-count { font-size: 14px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
-.timer-bar-bg { height: 7px; background: var(--bg); border-radius: 4px; overflow: hidden; }
-.timer-bar { height: 100%; background: var(--teal); border-radius: 4px; transition: width 1s linear, background .5s; }
-
-.action-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-
-/* ── PASS LIST ── */
-.pass-list { display: flex; flex-direction: column; gap: 10px; }
-.pass-item {
-  background: var(--bg);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  display: flex; align-items: center; gap: 10px;
-  border: 0.5px solid var(--border);
-}
-.pass-id {
-  font-family: monospace; font-size: 13px;
-  font-weight: 700; color: var(--teal);
-  min-width: 66px;
-}
-.pass-detail { flex: 1; min-width: 0; }
-.pass-pwd { font-family: monospace; font-size: 14px; font-weight: 600; color: var(--text); }
-.pass-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
-.badge {
-  font-size: 11px; padding: 4px 10px;
-  border-radius: 20px; font-weight: 500; white-space: nowrap;
-}
-.badge-active { background: var(--teal-light); color: var(--teal-dark); }
-.badge-expired { background: var(--red-light); color: var(--red); }
-.badge-revoked { background: #EBEBEB; color: #888; }
-
-/* ── HOW IT WORKS ── */
-.steps { display: flex; flex-direction: column; gap: 14px; }
-.step-item { display: flex; gap: 12px; align-items: flex-start; }
-.step-num {
-  width: 26px; height: 26px; flex-shrink: 0;
-  background: var(--teal-light); color: var(--teal-dark);
-  border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700;
-}
-.step-text { font-size: 13px; color: var(--muted); line-height: 1.6; padding-top: 3px; }
-.step-text strong { color: var(--text); }
-
-.empty-state {
-  text-align: center; padding: 32px 0;
-  color: var(--muted); font-size: 14px;
-}
-.empty-state .empty-icon { font-size: 32px; margin-bottom: 8px; }
-
-/* ── TOAST ── */
-.toast {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-  background: #1A1A18; color: white;
-  padding: 10px 20px; border-radius: 24px;
-  font-size: 14px; font-weight: 500;
-  opacity: 0; transition: opacity .2s;
-  z-index: 999; pointer-events: none; white-space: nowrap;
-}
-.toast.show { opacity: 1; }
-
-/* ── TABS ── */
-.tabs { display: flex; border-bottom: 0.5px solid var(--border); margin-bottom: 16px; }
-.tab { padding: 8px 14px; font-size: 13px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -0.5px; font-family: inherit; background: none; border-top: none; border-left: none; border-right: none; }
-.tab.active { color: var(--teal); border-bottom-color: var(--teal); font-weight: 600; }
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
-
-/* ── ALERT ── */
-.alert {
-  padding: 12px 16px; border-radius: var(--radius-sm);
-  font-size: 13px; margin-bottom: 16px; display: flex; gap: 10px; align-items: flex-start;
-}
-.alert-amber { background: var(--amber-light); color: var(--amber); border: 0.5px solid #E8C06A; }
-.alert-green { background: var(--teal-light); color: var(--teal-dark); border: 0.5px solid #7FD4B5; }
+:root{--bg:#F0EEE9;--card:#FFF;--b:rgba(0,0,0,.09);--t:#1A1A18;--m:#6B6B67;--gr:#1D9E75;--gl:#E1F5EE;--gd:#0F6E56;--rd:#D94F4F;--rl:#FCEAEA;--am:#B87414;--al:#FEF0D6;--r:14px;--rs:9px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--t);min-height:100vh}
+.hdr{background:var(--card);border-bottom:.5px solid var(--b);padding:0 20px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(0,0,0,.04)}
+.logo{width:34px;height:34px;background:linear-gradient(135deg,#1D9E75,#0F6E56);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:18px;height:18px}
+.htitle{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.hbadge{font-size:11px;background:var(--gl);color:var(--gd);padding:3px 9px;border-radius:20px;font-weight:600}
+.rstat{margin-left:auto;font-size:12px;color:var(--m);display:flex;align-items:center;gap:5px}
+.dot{width:7px;height:7px;border-radius:50%}
+.dot-g{background:var(--gr)}.dot-r{background:var(--rd)}.dot-a{background:var(--am)}
+.page{max-width:980px;margin:0 auto;padding:20px 16px 80px}
+/* SETUP */
+.setup-screen{min-height:88vh;display:flex;align-items:center;justify-content:center}
+.setup-card{background:var(--card);border-radius:var(--r);padding:40px 32px;max-width:460px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.08);text-align:center}
+.lbig{width:64px;height:64px;background:linear-gradient(135deg,#1D9E75,#0F6E56);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.lbig svg{width:32px;height:32px}
+.setup-card h2{font-size:24px;font-weight:700;margin-bottom:8px}
+.setup-card p{font-size:14px;color:var(--m);margin-bottom:28px;line-height:1.65}
+/* CARDS */
+.card{background:var(--card);border-radius:var(--r);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04)}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.sc{background:var(--card);border-radius:var(--rs);padding:14px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.sn{font-size:26px;font-weight:700}.sn.g{color:var(--gr)}.sl{font-size:11px;color:var(--m);margin-top:2px}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.mgrid{grid-template-columns:1fr}.stats-row{grid-template-columns:repeat(2,1fr)}}
+label{font-size:13px;color:var(--m);display:block;margin-bottom:5px}
+.field{margin-bottom:14px}
+input,select{width:100%;padding:10px 12px;border:.5px solid var(--b);border-radius:var(--rs);background:var(--bg);color:var(--t);font-size:14px;outline:none;transition:border-color .15s;font-family:inherit}
+input:focus,select:focus{border-color:var(--gr);background:#fff}
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.dbtn{padding:9px 4px;border:.5px solid var(--b);border-radius:var(--rs);background:var(--bg);color:var(--m);font-size:13px;cursor:pointer;text-align:center;transition:all .15s;font-family:inherit}
+.dbtn:hover{border-color:var(--gr);color:var(--gr)}
+.dbtn.on{background:var(--gl);border-color:var(--gr);color:var(--gd);font-weight:600}
+.bp{width:100%;padding:13px;border:none;border-radius:var(--rs);background:linear-gradient(135deg,#1D9E75,#0F6E56);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;font-family:inherit;transition:opacity .15s}
+.bp:hover{opacity:.9}.bp:disabled{opacity:.5;cursor:not-allowed}
+.bo{padding:9px 16px;border:.5px solid var(--b);border-radius:var(--rs);background:var(--bg);color:var(--t);font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}
+.bo:hover{background:var(--card);border-color:var(--gr);color:var(--gr)}
+.bd{padding:7px 12px;border:.5px solid var(--rd);border-radius:var(--rs);background:transparent;color:var(--rd);font-size:12px;cursor:pointer;font-family:inherit}
+/* RESULT */
+.rp{display:none;margin-top:16px;padding-top:16px;border-top:.5px solid var(--b)}
+.pdisplay{font-size:30px;font-weight:700;letter-spacing:3px;font-family:'Courier New',monospace;margin:6px 0 10px;word-break:break-all;line-height:1.3}
+.nbox{background:var(--gl);border-radius:var(--rs);padding:10px 12px;font-size:12px;color:var(--gd);line-height:1.9;margin-bottom:12px}
+.nbox b{font-size:11px;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
+.qrw{display:flex;justify-content:center;margin:12px 0}
+.qrw canvas{border-radius:8px}
+.tbg{height:7px;background:var(--bg);border-radius:4px;overflow:hidden;margin:8px 0}
+.tbar{height:100%;background:var(--gr);border-radius:4px;transition:width 1s linear,background .5s}
+.arow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+/* LIST */
+.plist{display:flex;flex-direction:column;gap:9px}
+.pi{background:var(--bg);border-radius:var(--rs);padding:11px 13px;display:flex;align-items:center;gap:10px;border:.5px solid var(--b)}
+.pid{font-family:monospace;font-size:13px;font-weight:700;color:var(--gr);min-width:64px}
+.pd{flex:1;min-width:0}
+.pp{font-family:monospace;font-size:14px;font-weight:600}
+.pm{font-size:12px;color:var(--m);margin-top:2px}
+.badge{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;white-space:nowrap}
+.ba{background:var(--gl);color:var(--gd)}.be{background:var(--rl);color:var(--rd)}.bv{background:#eee;color:#888}
+/* WIZARD */
+.wiz{display:flex;flex-direction:column;gap:0}
+.ws{display:flex;gap:0;position:relative}
+.ws:not(:last-child)::before{content:'';position:absolute;left:17px;top:38px;bottom:0;width:2px;background:var(--b)}
+.wn{width:34px;height:34px;flex-shrink:0;border-radius:50%;border:2px solid var(--b);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:var(--card);z-index:1;margin-right:14px;margin-top:3px}
+.wn.dn{background:var(--gr);border-color:var(--gr);color:#fff}
+.wn.ac{background:var(--gl);border-color:var(--gr);color:var(--gd)}
+.wb{flex:1;padding-bottom:20px}
+.wb h4{font-size:14px;font-weight:600;margin-bottom:6px}
+.wb p{font-size:13px;color:var(--m);line-height:1.7;margin-bottom:6px}
+.wb code{font-family:monospace;background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px;border:.5px solid var(--b)}
+.wb a{color:var(--gr);text-decoration:none}
+.wb a:hover{text-decoration:underline}
+/* TABS */
+.tabs{display:flex;border-bottom:.5px solid var(--b);margin-bottom:16px;overflow-x:auto}
+.tab{padding:9px 14px;font-size:13px;cursor:pointer;color:var(--m);border-bottom:2px solid transparent;margin-bottom:-.5px;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.tab.on{color:var(--gr);border-bottom-color:var(--gr);font-weight:600}
+.tp{display:none}.tp.on{display:block}
+.alert{padding:12px 16px;border-radius:var(--rs);font-size:13px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;line-height:1.6}
+.ag{background:var(--gl);color:var(--gd);border:.5px solid #7FD4B5}
+.aa{background:var(--al);color:var(--am);border:.5px solid #E8C06A}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1A1A18;color:#fff;padding:10px 20px;border-radius:24px;font-size:14px;font-weight:500;opacity:0;transition:opacity .2s;z-index:999;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.empty{text-align:center;padding:32px 0;color:var(--m);font-size:14px}
+.empty .ei{font-size:32px;margin-bottom:8px}
+hr{border:none;border-top:.5px solid var(--b);margin:14px 0}
+.stitle{font-size:14px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.sicon{width:28px;height:28px;background:var(--gl);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
 </style>
 </head>
 <body>
-
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <!-- SETUP SCREEN -->
 <div id="setup-screen" class="setup-screen" style="display:none">
   <div class="setup-card">
-    <div class="logo-big">
-      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
-        <path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>
-      </svg>
-    </div>
+    <div class="lbig"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg></div>
     <h2>Welcome to MyPass</h2>
-    <p>Enter your Cloud URL and License Key to get started. You only do this once.</p>
-    <div class="setup-fields">
-      <div class="field">
-        <label>Cloud API URL</label>
-        <input type="text" id="setup-url" placeholder="https://mypass-cloud.onrender.com"/>
-      </div>
-      <div class="field">
-        <label>License Key</label>
-        <input type="password" id="setup-key" placeholder="MYPASS-HOME-001"/>
-      </div>
-      <button class="btn-primary" onclick="doSetup()">Connect to MyPass →</button>
+    <p>Smart guest WiFi with auto-expiring passwords. Enter your details to get started — you only do this once.</p>
+    <div style="text-align:left">
+      <div class="field"><label>MyPass Cloud URL</label><input id="su-url" placeholder="https://mypass-cloud.onrender.com" type="text"/></div>
+      <div class="field"><label>License Key</label><input id="su-key" placeholder="MYPASS-HOME-001" type="password"/></div>
+      <button class="bp" onclick="doSetup()">Connect to MyPass →</button>
     </div>
   </div>
 </div>
 
 <!-- MAIN APP -->
 <div id="main-app" style="display:none">
-  <div class="header">
-    <div class="logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
-        <path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>
-      </svg>
-    </div>
-    <span class="header-title">MyPass</span>
-    <span class="header-key" id="header-key"></span>
-    <span class="header-sub" id="header-sub">Guest WiFi Manager</span>
+  <div class="hdr">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg></div>
+    <span class="htitle">MyPass</span>
+    <span class="hbadge">PRO</span>
+    <div class="rstat"><div class="dot dot-a" id="rdot"></div><span id="rtext">Router not linked</span></div>
   </div>
 
   <div class="page">
+    <div id="alert-warn" class="alert aa" style="display:none">⚠️ <span>GL.iNet router not linked yet — open the <strong>Router Setup</strong> tab and follow the steps. Takes 5 minutes.</span></div>
+    <div id="alert-ok" class="alert ag" style="display:none">✅ <span><strong>Router linked!</strong> Passwords change automatically — fully hands-free.</span></div>
 
-    <!-- STATS -->
     <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-num" id="s-total">—</div>
-        <div class="stat-label">Total passes</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num green" id="s-active">—</div>
-        <div class="stat-label">Active now</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="s-expired">—</div>
-        <div class="stat-label">Used / expired</div>
-      </div>
+      <div class="sc"><div class="sn g" id="s-active">—</div><div class="sl">Active now</div></div>
+      <div class="sc"><div class="sn" id="s-total">—</div><div class="sl">Total passes</div></div>
+      <div class="sc"><div class="sn" id="s-expired">—</div><div class="sl">Expired</div></div>
+      <div class="sc"><div class="sn" id="s-router" style="font-size:18px">—</div><div class="sl">Router</div></div>
     </div>
 
-    <div class="main-grid">
-
-      <!-- LEFT: CREATE PASS -->
+    <div class="mgrid">
+      <!-- LEFT: CREATE -->
       <div class="card">
-        <div class="section-title"><div class="icon">🔑</div> Create guest pass</div>
-
-        <div class="field">
-          <label>Guest name (optional)</label>
-          <input type="text" id="f-guest" placeholder="e.g. Uncle Raj, Friend"/>
-        </div>
-        <div class="field">
-          <label>Your WiFi name (exactly as it appears)</label>
-          <input type="text" id="f-ssid" placeholder="e.g. Jio_Home_4G"/>
-        </div>
-        <div class="field">
-          <label>Password style</label>
+        <div class="stitle"><div class="sicon">🔑</div>Create guest pass</div>
+        <div class="field"><label>Guest name (optional)</label><input id="f-guest" placeholder="e.g. Uncle Raj, Friend" type="text"/></div>
+        <div class="field"><label>Guest WiFi name (your GL.iNet SSID)</label><input id="f-ssid" placeholder="MyPass-Guest" type="text"/></div>
+        <div class="field"><label>Password style</label>
           <select id="f-style">
-            <option value="pronounceable">Pronounceable — easy to say (KaBiRo72)</option>
-            <option value="words">Words — e.g. ocean-tiger-42</option>
+            <option value="pronounceable">Pronounceable — easy to say aloud</option>
+            <option value="words">Words — ocean-tiger-42</option>
             <option value="random">Random — strongest security</option>
           </select>
         </div>
-        <div class="field">
-          <label>Valid for</label>
-          <div class="dur-grid">
-            <button class="dur-btn" data-val="30">30 min</button>
-            <button class="dur-btn active" data-val="60">1 hour</button>
-            <button class="dur-btn" data-val="120">2 hours</button>
-            <button class="dur-btn" data-val="240">4 hours</button>
-            <button class="dur-btn" data-val="480">8 hours</button>
-            <button class="dur-btn" data-val="1440">1 day</button>
+        <div class="field"><label>Valid for</label>
+          <div class="dgrid">
+            <button class="dbtn" data-v="30">30 min</button>
+            <button class="dbtn on" data-v="60">1 hour</button>
+            <button class="dbtn" data-v="120">2 hours</button>
+            <button class="dbtn" data-v="240">4 hours</button>
+            <button class="dbtn" data-v="480">8 hours</button>
+            <button class="dbtn" data-v="1440">1 day</button>
           </div>
         </div>
+        <button class="bp" id="gen-btn" onclick="createPass()">⚡ Generate guest pass</button>
 
-        <button class="btn-primary" id="gen-btn" onclick="createPass()">⚡ Generate guest pass</button>
-
-        <!-- RESULT -->
-        <div class="result-panel" id="result-panel">
-          <div style="font-size:12px;color:var(--muted)">WiFi password for your guest</div>
-          <div class="pass-display" id="res-pwd"></div>
-          <div class="nato-box">
-            <strong>📢 Say it aloud (if they can't scan)</strong>
-            <span id="res-nato"></span>
+        <div class="rp" id="result-panel">
+          <div style="font-size:12px;color:var(--m)">Temporary WiFi password</div>
+          <div class="pdisplay" id="res-pwd"></div>
+          <div class="nbox"><b>📢 Say aloud if guest can't scan QR</b><span id="res-nato"></span></div>
+          <div class="qrw" id="qr-wrap"></div>
+          <div style="font-size:12px;color:var(--m);text-align:center;margin-bottom:6px">Guest scans with phone camera → joins instantly</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+            <span style="font-size:12px;color:var(--m)">Time remaining</span>
+            <span style="font-size:14px;font-weight:600;font-variant-numeric:tabular-nums" id="t-count">—</span>
           </div>
-          <div class="qr-wrap" id="qr-wrap"></div>
-          <div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:8px">
-            Guest scans this with their phone camera — connects instantly
-          </div>
-          <div class="timer-wrap">
-            <div class="timer-top">
-              <span class="timer-label">Time remaining</span>
-              <span class="timer-count" id="t-count">—</span>
-            </div>
-            <div class="timer-bar-bg"><div class="timer-bar" id="t-bar"></div></div>
-          </div>
-          <div class="action-row">
-            <button class="btn-outline" onclick="copyPwd()">📋 Copy password</button>
-            <button class="btn-outline" onclick="sharePass()">📤 Share</button>
-            <button class="btn-danger" onclick="revokeActive()">🚫 Revoke now</button>
+          <div class="tbg"><div class="tbar" id="t-bar"></div></div>
+          <div class="arow">
+            <button class="bo" onclick="copyPwd()">📋 Copy</button>
+            <button class="bo" onclick="sharePass()">📤 Share</button>
+            <button class="bo" onclick="downloadQR()">💾 QR</button>
+            <button class="bd" onclick="revokeActive()">🚫 Revoke</button>
           </div>
         </div>
       </div>
@@ -438,68 +179,105 @@ input:focus, select:focus { border-color: var(--teal); background: white; }
       <!-- RIGHT: TABS -->
       <div class="card">
         <div class="tabs">
-          <button class="tab active" onclick="switchTab('history')">History</button>
-          <button class="tab" onclick="switchTab('how')">How it works</button>
-          <button class="tab" onclick="switchTab('settings')">Settings</button>
+          <button class="tab on" onclick="stab('history',this)">History</button>
+          <button class="tab" onclick="stab('setup',this)">Router Setup</button>
+          <button class="tab" onclick="stab('settings',this)">Settings</button>
         </div>
 
         <!-- HISTORY -->
-        <div class="tab-panel active" id="tab-history">
-          <div id="pass-list-wrap">
-            <div class="empty-state">
-              <div class="empty-icon">🔐</div>
-              No passes yet. Create your first one!
-            </div>
-          </div>
+        <div class="tp on" id="tab-history">
+          <div id="pass-list"><div class="empty"><div class="ei">🔐</div>No passes yet — create your first!</div></div>
         </div>
 
-        <!-- HOW IT WORKS -->
-        <div class="tab-panel" id="tab-how">
-          <div class="alert alert-amber" style="margin-bottom:16px">
-            ⚠️ <span><strong>Important:</strong> You must manually set your WiFi password in your router to the generated password each time. MyPass cannot do this automatically since your router has no guest network or API.</span>
-          </div>
-          <div class="steps">
-            <div class="step-item">
-              <div class="step-num">1</div>
-              <div class="step-text"><strong>Generate a pass</strong> — MyPass creates a unique password with a timer.</div>
+        <!-- ROUTER SETUP WIZARD -->
+        <div class="tp" id="tab-setup">
+          <div class="wiz">
+
+            <div class="ws">
+              <div class="wn dn">1</div>
+              <div class="wb">
+                <h4>Buy a GL.iNet Mango router</h4>
+                <p>Search Amazon India for <strong>GL.iNet GL-MT300N-V2</strong>. Cost: ₹1,800–2,500. It comes with OpenWrt pre-installed — no technical setup needed.</p>
+                <a href="https://www.amazon.in/s?k=GL.iNet+GL-MT300N-V2" target="_blank">→ Search on Amazon India</a>
+              </div>
             </div>
-            <div class="step-item">
-              <div class="step-num">2</div>
-              <div class="step-text"><strong>Set it on your router</strong> — Open 192.168.1.1 in your browser, go to Wireless settings, paste the password, save. Takes 1 minute.</div>
+
+            <div class="ws">
+              <div class="wn">2</div>
+              <div class="wb">
+                <h4>Connect it to your main router</h4>
+                <p>Use a regular Ethernet cable:<br>
+                <strong>Main router's yellow LAN port</strong> → <strong>GL.iNet's blue WAN port</strong><br>
+                Plug GL.iNet into power. Wait 30 seconds for it to boot.</p>
+              </div>
             </div>
-            <div class="step-item">
-              <div class="step-num">3</div>
-              <div class="step-text"><strong>Show the QR code</strong> to your guest — they scan it with their phone camera and connect instantly. No typing needed.</div>
+
+            <div class="ws">
+              <div class="wn">3</div>
+              <div class="wb">
+                <h4>Log into GL.iNet dashboard</h4>
+                <p>Connect your laptop to the GL.iNet WiFi (sticker on bottom shows default password). Open browser → go to <code>192.168.8.1</code>. Create a new admin password when asked.</p>
+              </div>
             </div>
-            <div class="step-item">
-              <div class="step-num">4</div>
-              <div class="step-text"><strong>When time is up</strong> — generate a new pass and update your router. The old password stops working because you've replaced it.</div>
+
+            <div class="ws">
+              <div class="wn">4</div>
+              <div class="wb">
+                <h4>Set your guest WiFi name</h4>
+                <p>In GL.iNet dashboard → <strong>Wireless</strong> → Set WiFi name (SSID) to: <code id="ssid-hint">MyPass-Guest</code><br>
+                Set any password for now. MyPass will rotate it automatically.</p>
+              </div>
             </div>
-            <div class="step-item">
-              <div class="step-num">5</div>
-              <div class="step-text"><strong>Revoke early</strong> — hit "Revoke now" in the app as a reminder to go update your router immediately.</div>
+
+            <div class="ws">
+              <div class="wn">5</div>
+              <div class="wb">
+                <h4>Install Node-RED on the router</h4>
+                <p>In GL.iNet dashboard → <strong>Applications</strong> → <strong>Plug-ins</strong> → search <code>node-red</code> → click <strong>Install</strong>.<br>
+                Takes 2–3 minutes. After install, open: <code>192.168.8.1:1880</code></p>
+              </div>
             </div>
+
+            <div class="ws">
+              <div class="wn">6</div>
+              <div class="wb">
+                <h4>Import the MyPass automation flow</h4>
+                <p>1. Go to <code>192.168.8.1:1880</code><br>
+                2. Click ☰ menu (top-right) → <strong>Import</strong><br>
+                3. Click the button below to copy the flow, paste it in Node-RED<br>
+                4. Click <strong>Import</strong> then the red <strong>Deploy</strong> button</p>
+                <button class="bo" onclick="copyFlow()" style="margin-top:6px">📋 Copy Node-RED flow</button>
+              </div>
+            </div>
+
+            <div class="ws">
+              <div class="wn" id="wn7">7</div>
+              <div class="wb">
+                <h4>Link router to MyPass — final step!</h4>
+                <p>Enter your GL.iNet router's IP (usually <code>192.168.8.1</code>) and click Link. This tells your cloud where to send commands.</p>
+                <div style="display:flex;gap:8px;margin-top:8px">
+                  <input id="router-ip" placeholder="192.168.8.1" type="text" style="flex:1"/>
+                  <button class="bo" onclick="linkRouter()">Link router</button>
+                </div>
+                <div id="link-msg" style="font-size:12px;color:var(--m);margin-top:8px"></div>
+              </div>
+            </div>
+
           </div>
         </div>
 
         <!-- SETTINGS -->
-        <div class="tab-panel" id="tab-settings">
-          <div class="field">
-            <label>Cloud API URL</label>
-            <input type="text" id="cfg-url" placeholder="https://mypass-cloud.onrender.com"/>
+        <div class="tp" id="tab-settings">
+          <div class="field"><label>Cloud API URL</label><input id="cfg-url" type="text"/></div>
+          <div class="field"><label>License Key</label><input id="cfg-key" type="password"/></div>
+          <div class="field"><label>Default guest WiFi name</label><input id="cfg-ssid" placeholder="MyPass-Guest" type="text"/></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="bo" onclick="saveSettings()">Save settings</button>
+            <button class="bo" style="color:var(--rd);border-color:var(--rd)" onclick="logout()">Logout</button>
           </div>
-          <div class="field">
-            <label>License Key</label>
-            <input type="password" id="cfg-key"/>
-          </div>
-          <div class="field">
-            <label>Default WiFi name</label>
-            <input type="text" id="cfg-ssid" placeholder="e.g. Jio_Home_4G"/>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn-outline" onclick="saveSettings()">Save settings</button>
-            <button class="btn-outline" style="color:var(--red);border-color:var(--red)" onclick="logout()">Logout</button>
-          </div>
+          <hr/>
+          <p style="font-size:12px;color:var(--m)">MyPass v3.0 · GL.iNet + OpenWrt + Node-RED edition<br>
+          Cloud: <span id="cfg-url-disp" style="font-family:monospace"></span></p>
         </div>
       </div>
     </div>
@@ -507,281 +285,221 @@ input:focus, select:focus { border-color: var(--teal); background: white; }
 </div>
 
 <script>
-// ── STATE ────────────────────────────────────────────────────────────────────
-let cfg = {};
-let activeDuration = 60;
-let activePassId = null;
-let timerInterval = null;
-let timerTotal = 0;
-let timerRemain = 0;
+let cfg={}, dur=60, apid=null, tiv=null, ttot=0, trem=0, rlinked=false;
 
-// ── BOOT ─────────────────────────────────────────────────────────────────────
-function boot() {
-  const saved = localStorage.getItem('mypass-cfg-v2');
-  if (saved) {
-    cfg = JSON.parse(saved);
-    showApp();
-  } else {
-    document.getElementById('setup-screen').style.display = 'flex';
-  }
+// BOOT
+function boot(){
+  const s=localStorage.getItem('mypass-v3');
+  if(s){cfg=JSON.parse(s);showApp();}
+  else document.getElementById('setup-screen').style.display='flex';
 }
 
-async function doSetup() {
-  const url = document.getElementById('setup-url').value.trim().replace(/\/$/, '');
-  const key = document.getElementById('setup-key').value.trim();
-  if (!url || !key) { toast('Please fill in both fields'); return; }
-
-  try {
-    const r = await fetch(url + '/api/stats', { headers: { 'X-License-Key': key } });
-    if (!r.ok) throw new Error('Bad key');
-    const d = await r.json();
-    cfg = { url, key, ssid: '' };
-    localStorage.setItem('mypass-cfg-v2', JSON.stringify(cfg));
-    showApp();
-    toast('Connected! Welcome to MyPass 🎉');
-  } catch(e) {
-    toast('Cannot connect — check URL and key');
-  }
+async function doSetup(){
+  const url=document.getElementById('su-url').value.trim().replace(/\/$/,'');
+  const key=document.getElementById('su-key').value.trim();
+  if(!url||!key){toast('Please fill in both fields');return;}
+  try{
+    const r=await fetch(url+'/api/stats',{headers:{'X-License-Key':key}});
+    if(!r.ok)throw 0;
+    cfg={url,key,ssid:'MyPass-Guest'};
+    localStorage.setItem('mypass-v3',JSON.stringify(cfg));
+    showApp();toast('Connected! Welcome to MyPass 🎉');
+  }catch{toast('Cannot connect — check the URL and license key');}
 }
 
-function showApp() {
-  document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('main-app').style.display = 'block';
-  document.getElementById('header-key').textContent = cfg.key || '';
-  if (cfg.ssid) document.getElementById('f-ssid').value = cfg.ssid;
-  document.getElementById('cfg-url').value = cfg.url || '';
-  document.getElementById('cfg-key').value = cfg.key || '';
-  document.getElementById('cfg-ssid').value = cfg.ssid || '';
-  fetchStats();
-  fetchPasses();
+function showApp(){
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  document.getElementById('f-ssid').value=cfg.ssid||'MyPass-Guest';
+  document.getElementById('cfg-url').value=cfg.url||'';
+  document.getElementById('cfg-key').value=cfg.key||'';
+  document.getElementById('cfg-ssid').value=cfg.ssid||'';
+  document.getElementById('cfg-url-disp').textContent=cfg.url||'';
+  fetchStats();fetchPasses();
 }
 
-function logout() {
-  if (!confirm('Log out? You can log back in with your license key.')) return;
-  localStorage.removeItem('mypass-cfg-v2');
-  location.reload();
+function logout(){
+  if(!confirm('Log out of MyPass?'))return;
+  localStorage.removeItem('mypass-v3');location.reload();
 }
 
-// ── DURATION PICKER ───────────────────────────────────────────────────────────
-document.querySelectorAll('.dur-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.dur-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeDuration = parseInt(btn.dataset.val);
-  });
-});
-
-// ── TAB SWITCHER ──────────────────────────────────────────────────────────────
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('tab-' + name).classList.add('active');
+// TABS
+function stab(n,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tp').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('tab-'+n).classList.add('on');
 }
 
-// ── API ───────────────────────────────────────────────────────────────────────
-async function api(method, path, body) {
-  const opts = {
-    method,
-    headers: { 'X-License-Key': cfg.key, 'Content-Type': 'application/json' }
-  };
-  if (body) opts.body = JSON.stringify(body);
-  const r = await fetch(cfg.url + path, opts);
-  if (r.status === 204) return null;
-  if (!r.ok) throw new Error(r.status);
+// DURATION
+document.querySelectorAll('.dbtn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.dbtn').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');dur=parseInt(b.dataset.v);
+}));
+
+// API
+async function api(m,p,body){
+  const o={method:m,headers:{'X-License-Key':cfg.key,'Content-Type':'application/json'}};
+  if(body)o.body=JSON.stringify(body);
+  const r=await fetch(cfg.url+p,o);
+  if(r.status===204)return null;
+  if(!r.ok)throw r.status;
   return r.json();
 }
 
-// ── STATS ─────────────────────────────────────────────────────────────────────
-async function fetchStats() {
-  try {
-    const d = await api('GET', '/api/stats');
-    document.getElementById('s-total').textContent = d.total_passes;
-    document.getElementById('s-active').textContent = d.active_passes;
-    document.getElementById('s-expired').textContent = d.expired_passes;
-    document.getElementById('header-sub').textContent = `${d.owner} · ${d.plan} plan`;
-  } catch(e) {}
+// STATS
+async function fetchStats(){
+  try{
+    const d=await api('GET','/api/stats');
+    document.getElementById('s-total').textContent=d.total_passes;
+    document.getElementById('s-active').textContent=d.active_passes;
+    document.getElementById('s-expired').textContent=d.expired_passes;
+    rlinked=d.router_linked;
+    document.getElementById('s-router').textContent=d.router_linked?'🟢':'🔴';
+    const dot=document.getElementById('rdot'),txt=document.getElementById('rtext');
+    if(d.router_linked){
+      dot.className='dot dot-g';txt.textContent='Router linked';
+      document.getElementById('alert-warn').style.display='none';
+      document.getElementById('alert-ok').style.display='flex';
+      document.getElementById('wn7').classList.add('dn');
+    } else {
+      dot.className='dot dot-a';txt.textContent='Router not linked';
+      document.getElementById('alert-warn').style.display='flex';
+      document.getElementById('alert-ok').style.display='none';
+    }
+  }catch(e){}
 }
 
-// ── PASS LIST ─────────────────────────────────────────────────────────────────
-async function fetchPasses() {
-  try {
-    const d = await api('GET', '/api/passes');
-    renderPasses(d.passes);
-  } catch(e) {}
+// PASS LIST
+async function fetchPasses(){
+  try{const d=await api('GET','/api/passes');renderList(d.passes);}catch(e){}
 }
-
-function renderPasses(passes) {
-  const wrap = document.getElementById('pass-list-wrap');
-  if (!passes || !passes.length) {
-    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🔐</div>No passes yet. Create your first one!</div>';
-    return;
-  }
-  const now = new Date();
-  wrap.innerHTML = '<div class="pass-list">' + passes.slice(0, 10).map(p => {
-    const exp = new Date(p.expires_at + 'Z');
-    const diffMin = Math.round((exp - now) / 60000);
-    const timeStr = p.status === 'active' && diffMin > 0
-      ? `${diffMin < 60 ? diffMin + 'm' : Math.round(diffMin/60) + 'h'} left`
-      : p.status;
-    const guestStr = p.guest_name && p.guest_name !== 'Guest' ? ` · ${p.guest_name}` : '';
-    return `
-    <div class="pass-item">
-      <div>
-        <div class="pass-id">${p.id}</div>
-      </div>
-      <div class="pass-detail">
-        <div class="pass-pwd">${p.password}</div>
-        <div class="pass-meta">${p.wifi_name}${guestStr} · ${p.duration_minutes}min · ${timeStr}</div>
-      </div>
-      <span class="badge badge-${p.status}">${p.status}</span>
-      ${p.status === 'active'
-        ? `<button class="btn-danger" onclick="revoke('${p.id}')">✕</button>`
-        : ''}
+function renderList(passes){
+  const w=document.getElementById('pass-list');
+  if(!passes||!passes.length){w.innerHTML='<div class="empty"><div class="ei">🔐</div>No passes yet</div>';return;}
+  const now=new Date();
+  w.innerHTML='<div class="plist">'+passes.slice(0,10).map(p=>{
+    const exp=new Date(p.expires_at+'Z');
+    const diff=Math.round((exp-now)/60000);
+    const ts=p.status==='active'&&diff>0?(diff<60?diff+'m':Math.round(diff/60)+'h')+' left':p.status;
+    const gs=p.guest_name&&p.guest_name!=='Guest'?` · ${p.guest_name}`:'';
+    return `<div class="pi">
+      <div class="pid">${p.id}</div>
+      <div class="pd"><div class="pp">${p.password}</div><div class="pm">${p.ssid}${gs} · ${p.duration_minutes}min · ${ts}</div></div>
+      <span class="badge ${p.status==='active'?'ba':p.status==='expired'?'be':'bv'}">${p.status}</span>
+      ${p.status==='active'?`<button class="bd" onclick="revoke('${p.id}')">✕</button>`:''}
     </div>`;
-  }).join('') + '</div>';
+  }).join('')+'</div>';
 }
 
-// ── CREATE PASS ───────────────────────────────────────────────────────────────
-async function createPass() {
-  const ssid = document.getElementById('f-ssid').value.trim();
-  if (!ssid) { toast('Please enter your WiFi name first'); document.getElementById('f-ssid').focus(); return; }
-
-  const btn = document.getElementById('gen-btn');
-  btn.disabled = true; btn.textContent = '⏳ Generating…';
-
-  try {
-    const data = await api('POST', '/api/passes', {
-      wifi_name: ssid,
-      duration_minutes: activeDuration,
-      password_style: document.getElementById('f-style').value,
-      guest_name: document.getElementById('f-guest').value.trim(),
+// CREATE PASS
+async function createPass(){
+  const ssid=document.getElementById('f-ssid').value.trim();
+  if(!ssid){toast('Enter your guest WiFi name first');document.getElementById('f-ssid').focus();return;}
+  const btn=document.getElementById('gen-btn');
+  btn.disabled=true;btn.textContent='⏳ Generating…';
+  try{
+    const data=await api('POST','/api/passes',{
+      ssid,duration_minutes:dur,
+      password_style:document.getElementById('f-style').value,
+      guest_name:document.getElementById('f-guest').value.trim()
     });
+    apid=data.id;
+    cfg.ssid=ssid;localStorage.setItem('mypass-v3',JSON.stringify(cfg));
+    document.getElementById('ssid-hint').textContent=ssid;
+    showResult(data);fetchPasses();fetchStats();
+    toast(rlinked?'Pass created — router updated automatically! 🎉':'Pass created! Link your router to automate everything.');
+  }catch(e){toast('Error — check your connection');}
+  finally{btn.disabled=false;btn.textContent='⚡ Generate guest pass';}
+}
 
-    activePassId = data.id;
+function showResult(d){
+  document.getElementById('result-panel').style.display='block';
+  document.getElementById('res-pwd').textContent=d.password;
+  document.getElementById('res-nato').textContent=d.nato_hint;
+  const qw=document.getElementById('qr-wrap');qw.innerHTML='';
+  new QRCode(qw,{text:d.qr_data,width:180,height:180,colorDark:'#1A1A18',colorLight:'#FFF',correctLevel:QRCode.CorrectLevel.M});
+  if(tiv)clearInterval(tiv);
+  const exp=new Date(d.expires_at+'Z');
+  ttot=dur*60;trem=Math.floor((exp-new Date())/1000);
+  tickT();tiv=setInterval(tickT,1000);
+  document.getElementById('result-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 
-    // Save ssid preference
-    cfg.ssid = ssid;
-    localStorage.setItem('mypass-cfg-v2', JSON.stringify(cfg));
+function tickT(){
+  if(trem<=0){clearInterval(tiv);document.getElementById('t-count').textContent='Expired';document.getElementById('t-bar').style.cssText='width:0%;background:var(--rd)';return;}
+  const pct=(trem/ttot)*100;
+  document.getElementById('t-bar').style.cssText=`width:${pct}%;background:${pct>50?'var(--gr)':pct>20?'var(--am)':'var(--rd)'}`;
+  const h=Math.floor(trem/3600),m=Math.floor((trem%3600)/60),s=trem%60;
+  const parts=[];if(h)parts.push(h+'h');if(m||h)parts.push(m+'m');parts.push(String(s).padStart(2,'0')+'s');
+  document.getElementById('t-count').textContent=parts.join(' ');
+  trem--;
+}
 
-    showResult(data);
-    fetchPasses();
+// ACTIONS
+function copyPwd(){navigator.clipboard.writeText(document.getElementById('res-pwd').textContent).then(()=>toast('Password copied!'));}
+function sharePass(){
+  const pwd=document.getElementById('res-pwd').textContent,ssid=document.getElementById('f-ssid').value;
+  const txt=`📶 Guest WiFi\nNetwork: ${ssid}\nPassword: ${pwd}\nValid for ${dur} minutes\n\nScan the QR code for instant connect.`;
+  if(navigator.share)navigator.share({title:'MyPass Guest WiFi',text:txt});
+  else navigator.clipboard.writeText(txt).then(()=>toast('Copied!'));
+}
+function downloadQR(){
+  const c=document.querySelector('#qr-wrap canvas');
+  if(!c){toast('Generate a pass first');return;}
+  const a=document.createElement('a');a.download='mypass-qr.png';a.href=c.toDataURL();a.click();toast('QR saved!');
+}
+async function revokeActive(){
+  if(!apid)return;
+  if(!confirm('Revoke this pass now?'))return;
+  await revoke(apid);clearInterval(tiv);
+  document.getElementById('result-panel').style.display='none';apid=null;
+}
+async function revoke(id){
+  try{await api('DELETE',`/api/passes/${id}`);fetchPasses();fetchStats();toast(rlinked?'Pass revoked — router locked guest out':'Pass revoked');}
+  catch{toast('Error revoking');}
+}
+
+// ROUTER LINK
+async function linkRouter(){
+  const ip=document.getElementById('router-ip').value.trim()||'192.168.8.1';
+  const webhook=`http://${ip}:1880/mypass`;
+  const msg=document.getElementById('link-msg');
+  msg.textContent='Linking…';
+  try{
+    await api('POST','/api/settings/router-webhook',{webhook_url:webhook});
+    msg.textContent='✅ Linked! Webhook: '+webhook;
+    document.getElementById('wn7').classList.add('dn');
+    toast('Router linked! Fully automated now 🎉');
     fetchStats();
-    toast('Pass created! Update your router now 👆');
-  } catch(e) {
-    toast('Error — check your connection');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '⚡ Generate guest pass';
-  }
+  }catch{msg.textContent='❌ Error — make sure your cloud API is running';}
 }
 
-function showResult(data) {
-  document.getElementById('result-panel').style.display = 'block';
-  document.getElementById('res-pwd').textContent = data.password;
-  document.getElementById('res-nato').textContent = data.nato_hint;
+// Node-RED flow copy
+const FLOW=`[{"id":"mypass-tab","type":"tab","label":"MyPass WiFi Controller"},{"id":"http-in-1","type":"http in","z":"mypass-tab","name":"Receive MyPass Command","url":"/mypass","method":"post","x":130,"y":100,"wires":[["verify-secret"]]},{"id":"verify-secret","type":"function","z":"mypass-tab","name":"Verify & Route","func":"var secret='mypass-secret-2024';\\nvar b=msg.payload;\\nif(b.secret!==secret){msg.statusCode=401;msg.payload={error:'bad secret'};node.send([null,msg]);return;}\\nmsg.action=b.action;msg.ssid=b.ssid||'MyPass-Guest';msg.password=b.password||'';\\nnode.send([msg,null]);","outputs":2,"x":330,"y":100,"wires":[["route-action"],["http-err"]]},{"id":"route-action","type":"switch","z":"mypass-tab","name":"Route","property":"action","propertyType":"msg","rules":[{"t":"eq","v":"set_password","vt":"str"},{"t":"eq","v":"expire","vt":"str"}],"checkall":"false","outputs":2,"x":520,"y":100,"wires":[["cmd-set"],["cmd-expire"]]},{"id":"cmd-set","type":"function","z":"mypass-tab","name":"Set Password CMD","func":"var s=msg.ssid,p=msg.password;\\nmsg.payload=['uci set wireless.guest_radio0.ssid=\\"'+s+'\\"','uci set wireless.guest_radio0.key=\\"'+p+'\\"','uci set wireless.guest_radio0.disabled=0','uci commit wireless','wifi reload'].join(' && ');\\nreturn msg;","x":730,"y":60,"wires":[["exec-cmd"]]},{"id":"cmd-expire","type":"function","z":"mypass-tab","name":"Expire CMD","func":"msg.payload=['uci set wireless.guest_radio0.disabled=1','uci commit wireless','wifi reload'].join(' && ');return msg;","x":730,"y":140,"wires":[["exec-cmd"]]},{"id":"exec-cmd","type":"exec","z":"mypass-tab","name":"Run on Router","command":"","addpay":true,"x":940,"y":100,"wires":[["log-ok"],["log-err"],[]]},{"id":"log-ok","type":"debug","z":"mypass-tab","name":"OK","active":true,"x":1100,"y":60,"wires":[]},{"id":"log-err","type":"debug","z":"mypass-tab","name":"ERR","active":true,"x":1100,"y":140,"wires":[]},{"id":"http-err","type":"http response","z":"mypass-tab","statusCode":"401","x":520,"y":200,"wires":[]},{"id":"poll","type":"inject","z":"mypass-tab","name":"Check expiry every 60s","repeat":"60","once":true,"onceDelay":10,"x":150,"y":280,"wires":[["poll-req"]]},{"id":"poll-req","type":"http request","z":"mypass-tab","name":"Poll Cloud","method":"GET","ret":"obj","url":"https://mypass-cloud.onrender.com/api/router/pending-expiry","headers":[{"keyType":"str","keyValue":"X-License-Key","valueType":"str","valueValue":"MYPASS-HOME-001"}],"x":380,"y":280,"wires":[["poll-check"]]},{"id":"poll-check","type":"function","z":"mypass-tab","name":"Handle expiry","func":"var exp=msg.payload.expired_passes||[];\\nif(exp.length===0)return null;\\nmsg.payload=['uci set wireless.guest_radio0.disabled=1','uci commit wireless','wifi reload'].join(' && ');\\nreturn msg;","x":600,"y":280,"wires":[["exec-cmd"]]}]`;
 
-  // QR Code
-  const qrWrap = document.getElementById('qr-wrap');
-  qrWrap.innerHTML = '';
-  new QRCode(qrWrap, {
-    text: data.qr_data,
-    width: 180, height: 180,
-    colorDark: '#1A1A18', colorLight: '#FFFFFF',
-    correctLevel: QRCode.CorrectLevel.M
-  });
-
-  // Timer
-  if (timerInterval) clearInterval(timerInterval);
-  const exp = new Date(data.expires_at + 'Z');
-  timerTotal = activeDuration * 60;
-  timerRemain = Math.floor((exp - new Date()) / 1000);
-  tickTimer();
-  timerInterval = setInterval(tickTimer, 1000);
-
-  // Scroll to result on mobile
-  document.getElementById('result-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+function copyFlow(){
+  navigator.clipboard.writeText(FLOW).then(()=>toast('Flow copied! Paste into Node-RED → Import'));
 }
 
-function tickTimer() {
-  if (timerRemain <= 0) {
-    clearInterval(timerInterval);
-    document.getElementById('t-count').textContent = 'Expired';
-    document.getElementById('t-bar').style.width = '0%';
-    document.getElementById('t-bar').style.background = 'var(--red)';
-    return;
-  }
-  const pct = (timerRemain / timerTotal) * 100;
-  const bar = document.getElementById('t-bar');
-  bar.style.width = pct + '%';
-  bar.style.background = pct > 50 ? 'var(--teal)' : pct > 20 ? 'var(--amber)' : 'var(--red)';
-
-  const h = Math.floor(timerRemain / 3600);
-  const m = Math.floor((timerRemain % 3600) / 60);
-  const s = timerRemain % 60;
-  const parts = [];
-  if (h) parts.push(h + 'h');
-  if (m || h) parts.push(m + 'm');
-  parts.push(String(s).padStart(2, '0') + 's');
-  document.getElementById('t-count').textContent = parts.join(' ');
-  timerRemain--;
-}
-
-// ── ACTIONS ───────────────────────────────────────────────────────────────────
-function copyPwd() {
-  const pwd = document.getElementById('res-pwd').textContent;
-  navigator.clipboard.writeText(pwd).then(() => toast('Password copied!'));
-}
-
-function sharePass() {
-  const pwd = document.getElementById('res-pwd').textContent;
-  const ssid = document.getElementById('f-ssid').value;
-  const text = `WiFi: ${ssid}\nPassword: ${pwd}\nValid for ${activeDuration} minutes`;
-  if (navigator.share) {
-    navigator.share({ title: 'MyPass Guest WiFi', text });
-  } else {
-    navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard!'));
-  }
-}
-
-async function revokeActive() {
-  if (!activePassId) return;
-  if (!confirm('Revoke this pass? Remember to also update your router password.')) return;
-  await revoke(activePassId);
-  clearInterval(timerInterval);
-  document.getElementById('result-panel').style.display = 'none';
-  activePassId = null;
-}
-
-async function revoke(id) {
-  try {
-    await api('DELETE', `/api/passes/${id}`);
-    fetchPasses(); fetchStats();
-    toast('Pass revoked');
-  } catch(e) { toast('Error revoking'); }
-}
-
-// ── SETTINGS ─────────────────────────────────────────────────────────────────
-function saveSettings() {
-  cfg.url = document.getElementById('cfg-url').value.trim().replace(/\/$/, '');
-  cfg.key = document.getElementById('cfg-key').value.trim();
-  cfg.ssid = document.getElementById('cfg-ssid').value.trim();
-  localStorage.setItem('mypass-cfg-v2', JSON.stringify(cfg));
-  if (cfg.ssid) document.getElementById('f-ssid').value = cfg.ssid;
+// SETTINGS
+function saveSettings(){
+  cfg.url=document.getElementById('cfg-url').value.trim().replace(/\/$/,'');
+  cfg.key=document.getElementById('cfg-key').value.trim();
+  cfg.ssid=document.getElementById('cfg-ssid').value.trim();
+  localStorage.setItem('mypass-v3',JSON.stringify(cfg));
+  if(cfg.ssid)document.getElementById('f-ssid').value=cfg.ssid;
+  document.getElementById('cfg-url-disp').textContent=cfg.url;
   toast('Settings saved!');
 }
 
-// ── TOAST ─────────────────────────────────────────────────────────────────────
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2800);
+// TOAST
+function toast(msg){
+  const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
 }
 
-// ── AUTO REFRESH ──────────────────────────────────────────────────────────────
-setInterval(() => { fetchStats(); fetchPasses(); }, 30000);
-
+setInterval(()=>{fetchStats();fetchPasses();},30000);
 boot();
 </script>
 </body>
